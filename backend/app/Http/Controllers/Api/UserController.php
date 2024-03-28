@@ -60,10 +60,17 @@ class UserController extends Controller
         if (!$user) {
             return response()->json(['error' => 'User not found.'], Response::HTTP_NOT_FOUND);
         }
-        return new TaskCollection(Task::where('user_id', $id)
+        if (in_array('admin',$user->getRoleNames()->toArray()))
+          {
+            $t = Task::orderBy('updated_at', 'desc')->paginate(10);
+            
+          } else {
+            $t = Task::where('user_id', $id)
             ->orWhere('assigned_to', $id)
             ->orderBy('updated_at', 'desc')
-            ->get());
+            ->get();
+          }
+        return new TaskCollection($t);
     }
 
     /**
@@ -74,13 +81,17 @@ class UserController extends Controller
      * @apiResourceModel App\Models\Task
      *
      * @param Request $request
-     * @param $id string
+     * @param $id int
      * @return TaskCollection|JsonResponse
      */
-    public function assignedTasks(Request $request, string $id): TaskCollection | JsonResponse
+    public function assignedTasks(Request $request, int $id): TaskCollection | JsonResponse
     {
-        $user = User::findOrFail($id);
+        
+        
+        if(!$id) return response()->json([]);
 
+        $user = User::findOrFail($id);
+        
         if (!$user) {
             return response()->json(['error' => 'User not found.'], Response::HTTP_NOT_FOUND);
         }

@@ -3,31 +3,43 @@
 namespace App\Services;
 
 use App\Models\Task;
+use Illuminate\Support\Facades\DB;
 
 class TaskGeneratorService
 {
-    public function generate()
+    public function generate($id=0)
     {
         $leadGenerationTasks = $this->generateLeadGenerationTasks();
         $leadNurturingTasks = $this->generateLeadNurturingTasks();
 
         //$tasks = array_merge($leadGenerationTasks, $leadNurturingTasks);
         $randomNumbers1 = collect(range(0, 9))->shuffle()->take(5)->toArray();
-        $randomNumbers2 = collect(range(0, 9))->shuffle()->take(5)->toArray();
+        $randomNumbers2 = collect(range(0, 8))->shuffle()->take(5)->toArray();
+        
+        //DB::transactions();
+        try {
+            for ($i=0;$i<5;$i++) {
+                $taskData = $leadGenerationTasks[$randomNumbers1[$i]];
+                if($i<2)
+                {
+                    $taskData['due_date'] = now()->addDays(2);
+                    $taskData['is_locked'] = false;
+                }
+                $tasks[] = Task::create([...$taskData,...['user_id'=>$id]]);
+                
+                $taskData = $leadNurturingTasks[$randomNumbers2[$i]];
+                $tasks[] = Task::create([...$taskData,...['user_id'=>$id]]);
 
+            } 
+        
+           // DB::commit();
 
-        for ($i=0;$i<5;$i++) {
-            $taskData = $leadGenerationTasks[$randomNumbers[$i]];
-            if($i<2)
-            {
-                 $taskData['due_date'] = now()->addDays(2);
-                 $taskData['is_locked'] = false;
-            }
-            Task::create($taskData);
-            
-            $taskData = $leadNurturingTasks[$randomNumbers[$i]];
-            Task::create($taskData);
-        } 
+            return $tasks;
+        } catch (throwable $e) {
+           // DB::rollback();
+        }
+
+        return false;
     }
 
     private function generateLeadGenerationTasks(): array

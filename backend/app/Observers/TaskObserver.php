@@ -20,12 +20,16 @@ class TaskObserver
     public function updated(Task $task): void
     {
         //
-        if($task->isDirty('status')){
+        \Log::info('Task Observer triggered!'); 
+
+        if($task->isDirty('status') || $task->wasChanged()){
             $id = $task->getId();
-            $status = $task->getStatus();
-            if(in_array($status,['completed','cancelled'])) {
+            $status = $task->getOrigional('Status');
+            if($status!== $task->getStatus() && in_array($status,['completed','cancelled'])) {
                 
-                $tasks = Task::whereRaw('due_date > NOW()')->orderBy('due_date')->take(2)->get();
+                $tasks = Task::whereRaw('due_date > NOW()')
+                ->where('status', 'Not Started')
+                ->orderBy('due_date')->take(2)->get();
                 foreach($tasks as $task) {
                     $task->update(['is_locked'=>false,'status' => 'pending']);
                 }

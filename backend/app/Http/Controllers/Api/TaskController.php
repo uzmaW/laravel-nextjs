@@ -51,16 +51,16 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request): TaskResource|JsonResponse
     {   
-        DB::beginTransaction();
+        //DB::beginTransaction();
         
         try {
             $task = Task::create($request->validated());
             //$task->users()->attach($request->user()->id);
-            DB::commit();
+          //  DB::commit();
         
             return new TaskResource($task);        
         } catch (Exception $e) {
-            DB::rollBack();
+            //DB::rollBack();
 
             return response()->json(['error' => 'Failed to create task.'], $e->getMessage());
         }
@@ -151,9 +151,19 @@ class TaskController extends Controller
         ]);
     }
 
-    public function automateTaskGenerate(TaskGeneratorService $taskGeneratorService)
-    {
-
+    /**
+     * @param $id
+     * @param TaskGeneratorService $taskGeneratorService
+     * @return JsonResponse
+     */
+    public function automateTaskGenerate(int $id,TaskGeneratorService $taskGeneratorService)
+    { 
+        $t =$taskGeneratorService->generate($id);
+        $msg = is_array($t) ?['success' => 'tasks generated successfully.'
+        ,'data'=>['tasks'=>$t]]
+        :['error' => 'error occurred while generating tasks.'];
+     
+        return response()->json($msg);
     }
 
 }
