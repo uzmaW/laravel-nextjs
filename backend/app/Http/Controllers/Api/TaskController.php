@@ -157,8 +157,15 @@ class TaskController extends Controller
      * @return JsonResponse
      */
     public function automateTaskGenerate(int $id,TaskGeneratorService $taskGeneratorService)
-    { 
-        $t =$taskGeneratorService->generate($id);
+    {   
+        if($id) 
+        {
+            $user = User::find($id);
+            $id_verified = $user ? $user->id : false;
+        }
+        
+        $t =$taskGeneratorService->generate($id_verified);
+
         $msg = is_array($t) ?['success' => 'tasks generated successfully.'
         ,'data'=>['tasks'=>$t]]
         :['error' => 'error occurred while generating tasks.'];

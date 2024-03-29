@@ -25,13 +25,21 @@ class TaskObserver
         if($task->isDirty('status') || $task->wasChanged()){
             $id = $task->getId();
             $status = $task->getOrigional('Status');
-            if($status!== $task->getStatus() && in_array($status,['completed','cancelled'])) {
+            $status_to_check = ['completed','cancelled'];
+            
+            if($status!== $task->getStatus() && in_array($status, $status_to_check)) {
+                $wkcount = Task::where('workflow', $task->workflow)->whereIn('status', $status_to_check)->count();
                 
-                $tasks = Task::whereRaw('due_date > NOW()')
-                ->where('status', 'Not Started')
-                ->orderBy('due_date')->take(2)->get();
-                foreach($tasks as $task) {
-                    $task->update(['is_locked'=>false,'status' => 'pending']);
+                if($wkcount == 2) {
+                    $task->update(['is_locked'=>true]);  
+                    $tasks = Task::whereRaw('due_date > NOW()')
+                    ->where('status', 'Not Started')
+                    ->orderBy('due_date')->take(2)->get();
+                    $wk = time();
+            
+                    foreach($tasks as $task) {
+                        $task->update(['is_locked'=>false,'status' => 'pending','workflow'=> $wk]);
+                    }
                 }
             }
         }

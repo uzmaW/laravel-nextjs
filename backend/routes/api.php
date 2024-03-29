@@ -22,5 +22,10 @@ Route::get('test', function(){
     $tasks = Task::whereRaw('due_date > NOW()')
     ->where('status', 'Not Started')
     ->orderBy('due_date')->take(2)->get();
-    dd($tasks);
+    $status_to_check = ['completed','cancelled'];
+    $wkcount = Task::where('workflow', 1711682888 )->whereIn('status', $status_to_check)->count();
+     dd($wkcount);
+    $workflow = Task::select('workflow')->max('workflow');
+    $workflow++;
+    dd($tasks,$workflow);
 });

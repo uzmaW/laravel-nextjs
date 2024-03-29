@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class TaskGeneratorService
 {
-    public function generate($id=0)
+    public function generate(int $id=0)
     {
         $leadGenerationTasks = $this->generateLeadGenerationTasks();
         $leadNurturingTasks = $this->generateLeadNurturingTasks();
@@ -15,6 +15,7 @@ class TaskGeneratorService
         //$tasks = array_merge($leadGenerationTasks, $leadNurturingTasks);
         $randomNumbers1 = collect(range(0, 9))->shuffle()->take(5)->toArray();
         $randomNumbers2 = collect(range(0, 8))->shuffle()->take(5)->toArray();
+        $workflow = time();
         
         //DB::transactions();
         try {
@@ -22,8 +23,9 @@ class TaskGeneratorService
                 $taskData = $leadGenerationTasks[$randomNumbers1[$i]];
                 if($i<2)
                 {
-                    $taskData['due_date'] = now()->addDays(2);
+                    $taskData['due_date']  = now()->addDays(2);
                     $taskData['is_locked'] = false;
+                    $taskData['workflow']  = $workflow;
                 }
                 $tasks[] = Task::create([...$taskData,...['user_id'=>$id]]);
                 
