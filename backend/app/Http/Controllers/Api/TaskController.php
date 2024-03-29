@@ -158,12 +158,12 @@ class TaskController extends Controller
      */
     public function automateTaskGenerate(int $id,TaskGeneratorService $taskGeneratorService)
     {   
-        $id_verified = false;
-        
+        $id_verified = 0;
+
         if($id) 
         {
             $user = User::find($id);
-            $id_verified = $user ? $user->id : false;
+            $id_verified = $user ? $user->id : 0;
         }
         
         $t =$taskGeneratorService->generate($id_verified);

@@ -18,6 +18,7 @@ class Task extends Model
         'category', // Add 'Lead Generation' or 'Lead Nurturing'
         'assigned_by',
         'assigned_to',
+        'user_id'
     ];
 
     public function assigner(): BelongsTo

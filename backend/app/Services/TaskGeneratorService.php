@@ -27,10 +27,14 @@ class TaskGeneratorService
                     $taskData['is_locked'] = false;
                     $taskData['workflow']  = $workflow;
                 }
-                $tasks[] = Task::create([...$taskData,...['user_id'=>$id]]);
+                $taskData['user_id']=$id;
+                $tasks[] = Task::create($taskData);
                 
                 $taskData = $leadNurturingTasks[$randomNumbers2[$i]];
-                $tasks[] = Task::create([...$taskData,...['user_id'=>$id]]);
+                $taskData['user_id']=$id;
+                $task = Task::create($taskData);
+                $tasks[] = $task;
+                \Log::info($id, [$task]);
 
             } 
         
